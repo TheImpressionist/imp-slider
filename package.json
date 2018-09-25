@@ -1,0 +1,72 @@
+{
+  "name": "slider",
+  "version": "0.0.1",
+  "description": "A dependency free React slider",
+  "main": "dist/index.js",
+  "scripts": {
+    "prestart": "rm -rf .tmp && mkdir .tmp",
+    "prebuild": "npm run test && npm",
+    "lint:style": "stylelint './src/**/*.style.ts'",
+    "lint:ts": "tslint -c tslint.json 'src/**/*.ts'",
+    "lint": "npm run lint:ts && npm run lint:style",
+    "test": "jest",
+    "build": "npm run lint && npm run test && webpack -p --config config/webpack.production.js",
+    "start": "npm run cosmos",
+    "cosmos": "cosmos",
+    "cosmos:export": "cosmos-export"
+  },
+  "keywords": [
+    "React",
+    "slider"
+  ],
+  "author": "Dominykas Bartkus",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.53",
+    "@babel/preset-env": "^7.0.0-beta.53",
+    "@babel/preset-react": "^7.0.0-beta.54",
+    "@babel/runtime": "^7.0.0-beta.53",
+    "@types/enzyme": "^3.1.14",
+    "@types/jest": "^23.1.6",
+    "@types/react": "^16.4.6",
+    "babel-jest": "^23.4.0",
+    "babel-loader": "^8.0.0-beta.4",
+    "babel-plugin-styled-components": "^1.5.1",
+    "enzyme": "^3.6.0",
+    "enzyme-adapter-react-16": "^1.5.0",
+    "html-webpack-plugin": "^3.2.0",
+    "jest": "^23.4.1",
+    "jest-styled-components": "^5.0.1",
+    "react-cosmos": "^4.5.0",
+    "stylelint": "^9.3.0",
+    "stylelint-config-recommended": "^2.1.0",
+    "stylelint-config-styled-components": "^0.1.1",
+    "ts-jest": "^23.0.0",
+    "ts-lint": "^4.5.1",
+    "ts-loader": "^4.4.2",
+    "tslint-eslint-rules": "^5.3.1",
+    "tslint-react": "^3.6.0",
+    "typescript": "^2.9.2",
+    "webpack": "^4.16.0",
+    "webpack-dev-server": "^3.1.4"
+  },
+  "dependencies": {
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "styled-components": "^3.3.3"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}
