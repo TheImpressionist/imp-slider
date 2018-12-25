@@ -1,5 +1,6 @@
 
-import Slider from '../';
+import React from 'react';
+import Slider from '..';
 
 const fixtures = [
   {
@@ -78,7 +79,46 @@ const fixtures = [
       max: 100,
       disabled: true,
     },
-  }
+  },
+  {
+    component: Slider,
+    name: 'Slider with custom handle',
+    props: {
+      defaultValue: 30,
+      min: 0,
+      max: 100,
+      handle: (props, state) => {
+        return (
+          <div
+            {...props}
+            className="custom-handle"
+            style={{
+              top: '-50%',
+              left: `${props.position}%`,
+              width: 10,
+              height: 10,
+              cursor: 'pointer',
+              position: 'absolute',
+              transform: 'translateY(-50%) trabslateX(-50%)',
+              backgroundColor: 'yellow',
+            }}
+          >
+            <span
+              className="value"
+              style={{
+                position: 'absolute',
+                top: '-18px',
+                left: '-50%',
+                transform: 'translateX(50%)',
+              }}
+            >
+              {state.value}
+            </span>
+          </div>
+        );
+      },
+    }
+  },
 ];
 
 export default fixtures;

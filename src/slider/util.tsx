@@ -282,6 +282,6 @@ export function getNextJumpPoint(mousePos: number, points: NodeList, container: 
 
 
 
-export function getValueFromPosition(position: number, max: number): number {
-  return position * max / 100;
+export function getValueFromPosition(position: number, min: number, max: number): number {
+  return position * (max + min) / 100;
 }

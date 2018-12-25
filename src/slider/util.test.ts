@@ -16,7 +16,7 @@ const oldInRange = (util as any).inRange;
 (util as any).inRange = jest.fn();
 
 test('Returns a valid % value when in range', () => {
-  const range: number[] = [8, 1067];
+  const range: Array<number> = [8, 1067];
   const value: number = 60;
   const expected: number = 5.67;
 
@@ -26,7 +26,7 @@ test('Returns a valid % value when in range', () => {
 });
 
 test('Returns closest point value when not in range', () => {
-  const range: number[] = [8, 1067];
+  const range: Array<number> = [8, 1067];
   const value: number = 0;
   const expected: number = 8;
 
@@ -54,8 +54,8 @@ test('Returns a correct step length for a given range', () => {
 });
 
 test('Calculates relative point position based on value range', () => {
-  const range: number[] = [0, 10];
-  const points: any[] = [{
+  const range: Array<number> = [0, 10];
+  const points: Array<any> = [{
     point: 0,
     expected: 0,
   }, {
@@ -73,8 +73,8 @@ test('Calculates relative point position based on value range', () => {
 });
 
 test('Calculates relative point custom position based on value range', () => {
-  const range: number[] = [0, 10];
-  const points: any[] = [{
+  const range: Array<number> = [0, 10];
+  const points: Array<any> = [{
     point: { key: 0, value: 'v1' },
     expected: 0,
   }, {
@@ -92,7 +92,7 @@ test('Calculates relative point custom position based on value range', () => {
 });
 
 test('Finds correct two possible jump points based on mouse position', () => {
-  const points: HTMLElement[] = <HTMLElement[]>[{
+  const points: Array<HTMLElement> = <Array<HTMLElement>>[{
     offsetLeft: 100,
   }, {
     offsetLeft: 150,
@@ -105,7 +105,7 @@ test('Finds correct two possible jump points based on mouse position', () => {
     item: (index: number) => points[index] ? points[index] : null,
   };
   (util.inRange as any).mockReturnValueOnce(true);
-  const closestPoints: any[] = findClosestPoints(mousePos, nodeList);
+  const closestPoints: Array<any> = findClosestPoints(mousePos, nodeList);
 
   expect(closestPoints).toHaveLength(2);
   expect(closestPoints[0]).toEqual(points[0]);
@@ -113,7 +113,7 @@ test('Finds correct two possible jump points based on mouse position', () => {
 });
 
 test('Finds one possible jump point when mouse is at the start', () => {
-  const points: HTMLElement[] = <HTMLElement[]>[{
+  const points: Array<HTMLElement> = <Array<HTMLElement>>[{
     offsetLeft: 100,
   }, {
     offsetLeft: 150,
@@ -125,7 +125,7 @@ test('Finds one possible jump point when mouse is at the start', () => {
     length: 3,
     item: (index: number) => points[index] ? points[index] : null,
   };
-  const closestPoints: any[] = findClosestPoints(mousePos, nodeList);
+  const closestPoints: Array<any> = findClosestPoints(mousePos, nodeList);
 
   expect(closestPoints).toHaveLength(2);
   expect(closestPoints[0]).toBeUndefined();
@@ -133,7 +133,7 @@ test('Finds one possible jump point when mouse is at the start', () => {
 });
 
 test('Finds one possible jump points when mouse is at the end', () => {
-  const points: HTMLElement[] = <HTMLElement[]>[{
+  const points: Array<HTMLElement> = <Array<HTMLElement>>[{
     offsetLeft: 100,
   }, {
     offsetLeft: 150,
@@ -145,7 +145,7 @@ test('Finds one possible jump points when mouse is at the end', () => {
     length: 3,
     item: (index: number) => points[index] ? points[index] : null,
   };
-  const closestPoints: any[] = findClosestPoints(mousePos, nodeList);
+  const closestPoints: Array<any> = findClosestPoints(mousePos, nodeList);
 
   expect(closestPoints).toHaveLength(2);
   expect(closestPoints[1]).toBeUndefined();
@@ -157,7 +157,7 @@ test('Returns the correct middle between two points', () => {
     offsetLeft: 0,
     offsetWidth: 100,
   };
-  const points: HTMLElement[] = <HTMLElement[]>[{
+  const points: Array<HTMLElement> = <Array<HTMLElement>>[{
     offsetLeft: 20,
   }, {
     offsetLeft: 70,
@@ -167,7 +167,7 @@ test('Returns the correct middle between two points', () => {
     offsetLeft: 90,
   }];
 
-  const expected: number[] = [45, 85, 0, 45];
+  const expected: Array<number> = [45, 85, 0, 45];
 
   expect(getMiddleBetweenPoints(points[0], points[1], slider)).toBe(expected[0]);
   expect(getMiddleBetweenPoints(points[1], points[2], slider)).toBe(expected[1]);
@@ -180,7 +180,7 @@ test('Returns correct next point value to jump to', () => {
     offsetLeft: 1,
     offsetWidth: 101,
   };
-  const points: HTMLElement[] = <HTMLElement[]>[{
+  const points: Array<HTMLElement> = <Array<HTMLElement>>[{
     offsetLeft: 20,
   }, {
     offsetLeft: 50,
@@ -191,7 +191,7 @@ test('Returns correct next point value to jump to', () => {
     length: 3,
     item: (index: number) => points[index] ? points[index] : null,
   };
-  const expected: any[] = [{
+  const expected: Array<any> = [{
     mousePos: 11,
     expected: 19.8,
   }, {
@@ -218,7 +218,7 @@ test('Returns correct next point value to jump to', () => {
 });
 
 test('Returns correct initial position value', () => {
-  const tests: any[] = [{
+  const tests: Array<any> = [{
     value: 10,
     min: 0,
     max: 100,
@@ -235,10 +235,8 @@ test('Returns correct initial position value', () => {
     value: 70,
     defaultValue: 50,
   }];
-  const expected: number[] = [10, 50, 0, 70];
-
+  const expected: Array<number> = [10, 50, 0, 70];
   (util as any).inRange = oldInRange;
-
   tests.forEach((props, idx) => {
     expect(resolveInitialValue(props)).toBe(expected[idx]);
   });

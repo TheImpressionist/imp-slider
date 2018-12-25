@@ -2,6 +2,8 @@
 import * as React from 'react';
 
 import {
+  inRange,
+  isNumber,
   isFunction,
   isUndefined,
   closestNumber,
@@ -40,7 +42,7 @@ export interface ISliderProps extends React.Props<HTMLElement> {
   points?: Array<SliderPointValue>;
   value?: number;
   defaultValue?: number;
-  handle?(props: ISliderHandleProps): React.ReactNode;
+  handle?(props?: ISliderHandleProps, state?: ISliderState): React.ReactNode;
   onChange?(value?: number): void;
   onMouseUp?(evt?: React.MouseEvent<HTMLElement>, value?: number): void;
   onMouseDown?(evt?: React.MouseEvent<HTMLElement>, value?: number): void;
@@ -61,8 +63,12 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
 
   public state: ISliderState = {
     value: isUndefined(this.props.value)
-      ? closestNumber(this.props.defaultValue || 0, this.props.min, this.props.max)
-      : closestNumber(this.props.value || 0, this.props.min, this.props.max),
+      ? inRange(this.props.defaultValue || 0, this.props.min, this.props.max)
+        ? this.props.defaultValue || 0
+        : closestNumber(this.props.defaultValue || 0, this.props.min, this.props.max)
+      : inRange(this.props.value || 0, this.props.min, this.props.max)
+        ? this.props.value || 0
+        : closestNumber(this.props.value || 0, this.props.min, this.props.max),
     position: 0,
   };
 
@@ -116,7 +122,7 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
           position: this.state.position,
           disabled: this.props.disabled,
           onMouseDown: this.onMouseDown,  
-        });
+        }, this.state);
       default:
         return (
           <SliderHandle
@@ -156,17 +162,10 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
 
   private onMouseUp = (evt: React.MouseEvent<HTMLElement>): void => {
     if (this.mouseHeldDown && !this.props.disabled) {
-      const value: number = closestNumber(
-        getValueFromPosition(this.state.position, this.props.max),
-        this.props.min,
-        this.props.max,
-      );
-      const roundedValue: number = roundValueByStep(value, this.props.step || 1);
       this.mouseHeldDown = false;
       if (this.props.onMouseUp) {
-        this.props.onMouseUp(evt, roundedValue);
+        this.props.onMouseUp(evt, this.state.value);
       }
-      this.setState({ ...this.state, value });
     }
   }
 
@@ -174,9 +173,7 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
     // Mouse move should be bound to the document instead
     // And removed on mouse up
     
-    // TODO: Check for controlled value
-    //       If controlled, do not update the position on move
-    if (!this.mouseHeldDown || this.props.disabled) {
+    if (!this.mouseHeldDown || this.props.disabled || isNumber(this.props.value)) {
       return;
     }
 
@@ -195,6 +192,7 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
 
     evt.stopPropagation();
     switch (true) {
+      case isNumber(this.props.value):
       case this.props.disabled:
         return;
       case this.props.jump && this.props.points && this.props.points.length:
@@ -215,15 +213,17 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
       this.props.step as number,
       evt.pageX,
     );
-    const value: number = closestNumber(
-      getValueFromPosition(position, this.props.max),
-      this.props.min,
-      this.props.max,
-    );
-    const roundedValue: number = roundValueByStep(value, this.props.step || 1);
-
+    const value: number = getValueFromPosition(position, this.props.min, this.props.max);
+    const validatedValue: number = inRange(value, this.props.min, this.props.max)
+      ? value
+      : closestNumber(value, this.props.min, this.props.max);
+    const roundedValue: number = roundValueByStep(validatedValue, this.props.step || 1);
     this.setState(
-      { ...this.state, position },
+      {
+        ...this.state,
+        position,
+        value: roundedValue,
+      },
       () => this.props.onChange && this.props.onChange(roundedValue),
     );
   }
@@ -234,19 +234,22 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
       (this.pointWrapper as HTMLElement).childNodes,
       (this.pointWrapper as HTMLElement),
     );
-    const value: number = closestNumber(
-      getValueFromPosition(position, this.props.max),
-      this.props.min,
-      this.props.max,
-    );
-    const roundedValue: number = roundValueByStep(value, this.props.step || 1);
+    const value: number = getValueFromPosition(position, this.props.min, this.props.max);
+    const validatedValue: number = inRange(value, this.props.min, this.props.max)
+      ? value
+      : closestNumber(value, this.props.min, this.props.max);
+    const roundedValue: number = roundValueByStep(validatedValue, this.props.step || 1);
 
     switch (true) {
       case position === -1:
         return;
       default:
         return this.setState(
-          { ...this.state, position },
+          {
+            ...this.state,
+            position,
+            value: roundedValue,
+          },
           () => this.props.onChange && this.props.onChange(roundedValue),
         );
     }

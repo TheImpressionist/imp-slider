@@ -61,6 +61,6 @@ export function closestNumber(value: number, lower: number, upper: number): numb
   }
 }
 
-export function calculatePercentFromRange(value: number, range: number[]): number {
+export function calculatePercentFromRange(value: number, range: Array<number>): number {
   return Number((100 * value / (range[1] - range[0])).toFixed(2));
 }
