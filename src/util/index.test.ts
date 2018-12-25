@@ -16,9 +16,10 @@ import {
   OBJECT,
   ARRAY,
   DATE,
+  roundValueByStep,
 } from './';
 
-const types: any[] = [
+const types: Array<any> = [
   {
     expected: BOOLEAN,
     value: true,
@@ -41,7 +42,7 @@ const types: any[] = [
   },
   {
     expected: STRING,
-    value: 'hello!'
+    value: 'hello!',
   },
   {
     expected: STRING,
@@ -70,10 +71,10 @@ const types: any[] = [
   {
     expected: DATE,
     value: new Date(),
-  }
+  },
 ];
 
-const range: any[] = [
+const range: Array<any> = [
   {
     value: 1,
     range: [0, 10],
@@ -108,7 +109,7 @@ const range: any[] = [
     value: 'asdbfasdc',
     range: [0, 10],
     expected: false,
-  }
+  },
 ];
 
 test('Returns correct type from object prototype call with any type', () => {
@@ -149,7 +150,7 @@ test('Returns expected bool value', () => {
 });
 
 test('Returns a correct % value when in range', () => {
-  const range: number[] = [8, 1067];
+  const range: Array<number> = [8, 1067];
   const value: number = 60;
   const expected: number = 5.67;
 
@@ -157,7 +158,7 @@ test('Returns a correct % value when in range', () => {
 });
 
 test('Returns the expected closest number', () => {
-  const nums: any[] = [{
+  const nums: Array<any> = [{
     value: 14,
     lower: 10,
     upper: 20,
@@ -175,4 +176,22 @@ test('Returns the expected closest number', () => {
   }];
 
   nums.forEach(num => expect(closestNumber(num.value, num.lower, num.upper)).toBe(num.expected));
+});
+
+test('Rounds number to the point based on the step provided to the slider', () => {
+  const values = [{
+    value: 1.02564,
+    expected: 1.03,
+    step: 0.01,
+  }, {
+    value: 1,
+    expected: 1,
+    step: 0.001,
+  }, {
+    value: 1.88888,
+    expected: 1.889,
+    step: 0.007,
+  }];
+
+  values.forEach(v => expect(roundValueByStep(v.value, v.step)).toEqual(v.expected));
 });

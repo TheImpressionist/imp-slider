@@ -37,7 +37,7 @@ export interface ISliderProps extends React.Props<HTMLElement> {
   step?: number;
   jump?: boolean;
   disabled?: boolean;
-  points?: SliderPointValue[];
+  points?: Array<SliderPointValue>;
   value?: number;
   defaultValue?: number;
   handle?(props: ISliderHandleProps): React.ReactNode;
@@ -52,9 +52,12 @@ export interface ISliderState {
 }
 
 export default class Slider extends React.Component<ISliderProps, ISliderState> {
-  private self: HTMLElement | void = void 0;
-  private mouseHeldDown: boolean = false;
-  private pointWrapper: HTMLElement | void = void 0;
+  public static defaultProps: ISliderProps = {
+    min: 0,
+    max: 10,
+    step: 1,
+    defaultValue: 0,
+  };
 
   public state: ISliderState = {
     value: isUndefined(this.props.value)
@@ -63,12 +66,9 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
     position: 0,
   };
 
-  public static defaultProps: ISliderProps = {
-    min: 0,
-    max: 10,
-    step: 1,
-    defaultValue: 0,
-  };
+  private self: HTMLElement | void = void 0;
+  private mouseHeldDown: boolean = false;
+  private pointWrapper: HTMLElement | void = void 0;
 
   constructor(props: ISliderProps) {
     super(props);
@@ -76,11 +76,13 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
   }
 
   public componentDidUpdate(prevProps: ISliderProps): void {
-    if (!isUndefined(this.props.value) && prevProps.value !== this.props.value)
+    if (!isUndefined(this.props.value) && prevProps.value !== this.props.value) {
       return this.setState({
         ...this.state,
+        value: this.props.value,
         position: calculatePositionFromRange(this.props.value as number, [this.props.min, this.props.max]),
       });
+    }
   }
 
   public render(): JSX.Element {
@@ -99,7 +101,7 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
         </SLIDER_TRACK_WRAPPER>
 
         <SLIDER_POINT_WRAPPER innerRef={this.assignPointRef}>
-          {resolvePoints(this.props.points as SliderPointValue[], this.state.position, [this.props.min, this.props.max])}
+          {resolvePoints(this.props.points as Array<SliderPointValue>, this.state.position, [this.props.min, this.props.max])}
         </SLIDER_POINT_WRAPPER>
       </SLIDER_STYLE_WRAPPER>
     );
@@ -161,7 +163,9 @@ export default class Slider extends React.Component<ISliderProps, ISliderState> 
       );
       const roundedValue: number = roundValueByStep(value, this.props.step || 1);
       this.mouseHeldDown = false;
-      this.props.onMouseUp && this.props.onMouseUp(evt, roundedValue);
+      if (this.props.onMouseUp) {
+        this.props.onMouseUp(evt, roundedValue);
+      }
       this.setState({ ...this.state, value });
     }
   }

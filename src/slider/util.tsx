@@ -40,7 +40,7 @@ export function resolveInitialValue(props: ISliderProps): number {
  * @return {[type]}       [description]
  */
 
-export function calculatePositionFromRange(value: number, range: number[]): number {
+export function calculatePositionFromRange(value: number, range: Array<number>): number {
   const isInRange: boolean = inRange(value, range[0], range[1]);
 
   switch (true) {
@@ -62,7 +62,7 @@ export function calculatePositionFromRange(value: number, range: number[]): numb
  * @return {[type]}       [description]
  */
 
-export function calculatePointPosition(point: SliderPointValue, range: number[]): number {
+export function calculatePointPosition(point: SliderPointValue, range: Array<number>): number {
   switch (true) {
     case isObject(point):
       return calculatePositionFromRange((point as IPoint).key, range);
@@ -83,7 +83,7 @@ export function calculatePointPosition(point: SliderPointValue, range: number[])
  * @return {[type]}          [description]
  */
 
-export function resolvePoints(points: SliderPointValue[], position: number, range: number[]): React.ReactNode | React.ReactNode[] {
+export function resolvePoints(points: Array<SliderPointValue>, position: number, range: Array<number>): React.ReactNode | Array<React.ReactNode> {
   switch (true) {
     case !isUndefined(points):
       return points.map((point: SliderPointValue, idx: number) => {
@@ -115,7 +115,7 @@ export function resolvePoints(points: SliderPointValue[], position: number, rang
  * @return {[type]}        [description]
  */
 
-export function getStepLength(step: number, length: number, range: number[]): number {
+export function getStepLength(step: number, length: number, range: Array<number>): number {
   const totalSteps: number = Math.floor((range[1] - range[0]) / step);
   const singleStepLength: number = length / totalSteps;
 
@@ -154,14 +154,15 @@ export function getNextStep(startPos: number, currentPos: number, stepLength: nu
  * @return {[type]}          [description]
  */
 
-export function calculateNextPos(slider: HTMLElement, range: number[], step: number, mousePos: number): number {
-  const sliderPos: number[] = [slider.offsetLeft, slider.offsetWidth];
+export function calculateNextPos(slider: HTMLElement, range: Array<number>, step: number, mousePos: number): number {
+  const sliderPos: Array<number> = [slider.offsetLeft, slider.offsetWidth];
   const length: number = sliderPos[1] - sliderPos[0];
   const stepLength: number = getStepLength(step as number, length, range);
   const stepsPosPx: number = getNextStep(slider.offsetLeft, mousePos, stepLength);
 
-  if (stepsPosPx >= slider.offsetWidth + slider.offsetLeft)
+  if (stepsPosPx >= slider.offsetWidth + slider.offsetLeft) {
     return slider.offsetWidth + slider.offsetLeft;
+  }
 
   return Math.round(calculatePercentFromRange(stepsPosPx, sliderPos));
 }
