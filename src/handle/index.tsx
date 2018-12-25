@@ -4,7 +4,7 @@ import * as React from 'react';
 import { HANDLE_STYLE } from './handle.style';
 import { resolveDisabled } from './util';
 
-export interface SliderHandleProps extends React.Props<HTMLDivElement> {
+export interface ISliderHandleProps extends React.Props<HTMLDivElement> {
   position: number;
   disabled?: boolean;
   onMouseOver?(evt: React.MouseEvent<HTMLDivElement>): void;
@@ -13,7 +13,7 @@ export interface SliderHandleProps extends React.Props<HTMLDivElement> {
   onMouseUp?(evt: React.MouseEvent<HTMLDivElement>): void;
 }
 
-const SLIDER_HANDLE: React.SFC<SliderHandleProps> = (props: SliderHandleProps): JSX.Element => (
+const SLIDER_HANDLE: React.SFC<ISliderHandleProps> = (props: ISliderHandleProps): JSX.Element => (
   <HANDLE_STYLE
     style={{ left: `${props.position}%` }}
     className={resolveDisabled(props.disabled as boolean, 'imp-slider__handle')}

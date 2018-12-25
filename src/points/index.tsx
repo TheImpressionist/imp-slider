@@ -10,20 +10,20 @@ import { resolvePointValue } from './util';
 
 export type PointValueType = string | number | React.ReactNode;
 
-export interface Point {
+export interface IPoint {
   key: number;
   value: PointValueType;
 }
 
-export type SliderPointValue = number | Point;
+export type SliderPointValue = number | IPoint;
 
-export interface SliderPointProps extends React.Props<void> {
+export interface ISliderPointProps extends React.Props<void> {
   active: boolean;
   position: number;
   value: SliderPointValue;
 }
 
-const SliderPoint: React.SFC<SliderPointProps> = (props: SliderPointProps): JSX.Element => (
+const SliderPoint: React.SFC<ISliderPointProps> = (props: ISliderPointProps): JSX.Element => (
   <POINT_WRAPPER style={{ left: `${props.position}%` }}>
     <POINT_INDICATOR_STYLE active={props.active} />
 

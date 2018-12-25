@@ -1,13 +1,13 @@
 
 import * as React from 'react';
 
-import { Point } from './';
+import { IPoint } from './';
 import { isObject } from '../util';
 
-export function resolvePointValue(point: number | Point): React.ReactNode {
+export function resolvePointValue(point: number | IPoint): React.ReactNode {
   switch (true) {
     case isObject(point) && point.hasOwnProperty('value'):
-      return (<Point>point).value;
+      return (<IPoint>point).value;
     default:
       return point;
   }

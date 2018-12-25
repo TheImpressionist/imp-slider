@@ -1,8 +1,8 @@
 
 import * as React from 'react';
 
-import { SliderProps } from './';
-import SliderPoint, { SliderPointValue, Point } from '../points';
+import { ISliderProps } from './';
+import SliderPoint, { SliderPointValue, IPoint } from '../points';
 import {
   inRange,
   isObject,
@@ -19,7 +19,7 @@ import {
  * @return {[type]}       [description]
  */
 
-export function resolveInitialValue(props: SliderProps): number {
+export function resolveInitialValue(props: ISliderProps): number {
   switch (true) {
     case !isUndefined(props.value) && isNumber(props.value):
       return calculatePositionFromRange(props.value as number, [props.min, props.max]);
@@ -65,7 +65,7 @@ export function calculatePositionFromRange(value: number, range: number[]): numb
 export function calculatePointPosition(point: SliderPointValue, range: number[]): number {
   switch (true) {
     case isObject(point):
-      return calculatePositionFromRange((point as Point).key, range);
+      return calculatePositionFromRange((point as IPoint).key, range);
     default:
       return calculatePositionFromRange(point as number, range);
   }
@@ -277,4 +277,10 @@ export function getNextJumpPoint(mousePos: number, points: NodeList, container: 
     default:
       return -1;
   }
+}
+
+
+
+export function getValueFromPosition(position: number, max: number): number {
+  return position * max / 100;
 }

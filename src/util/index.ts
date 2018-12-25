@@ -8,6 +8,7 @@ export const SYMBOL: string = '[object Symbol]';
 export const OBJECT: string = '[object Object]';
 export const ARRAY: string = '[object Array]';
 export const DATE: string = '[object Date]';
+export const FUNCTION: string = '[object Function]';
 
 export function callPrototype(value: any): string {
   return Object.prototype.toString.call(value);
@@ -29,8 +30,21 @@ export function isNumber(value: any): boolean {
   return callPrototype(value) === NUMBER;
 }
 
+export function isFunction(value: any): boolean {
+  return callPrototype(value) === FUNCTION;
+}
+
 export function inRange(value: number, min: number, max: number): boolean {
   return value >= min && value <= max;
+}
+
+export function roundValueByStep(value: number, step: number): number {
+  if (step >= 1) {
+    return value;
+  }
+
+  const decimalPlaces: number = step.toString().replace(/0\./, '').length;
+  return Number(value.toFixed(decimalPlaces));
 }
 
 export function closestNumber(value: number, lower: number, upper: number): number {

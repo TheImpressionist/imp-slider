@@ -5,6 +5,6 @@ Currently under construction.
 
 ## Setting it up
 
-##Props
+## Props
 
 ## Developing

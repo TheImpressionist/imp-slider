@@ -1,15 +1,21 @@
 
 import * as React from 'react';
 
-import { isUndefined } from '../util';
+import {
+  isFunction,
+  isUndefined,
+  closestNumber,
+  roundValueByStep,
+} from '../util';
 import SliderTrack from '../track';
-import SliderHandle from '../handle';
+import SliderHandle, { ISliderHandleProps } from '../handle';
 import { SliderPointValue } from '../points';
 import {
   resolvePoints,
   calculateNextPos,
   getNextJumpPoint,
   resolveInitialValue,
+  getValueFromPosition,
   calculatePositionFromRange,
 } from './util';
 import {
@@ -18,15 +24,14 @@ import {
   SLIDER_POINT_WRAPPER,
 } from './slider.style';
 
-// TODO: On Change method
-// TODO: On After Change method
-// TODO: Ability to provide a tooltip
-//       Should pass value data to it
+// TODO: On Change method (TEST)
+// TODO: On After Change method (TEST)
+// TODO: Ability to provide a custom handle (TEST)
 // TODO: Implement value control from the outside (DONE)
 // TODO: Implement disabled (DONE)
 // TODO: Normalize jumping between points when clicking (DONE)
 
-export interface SliderProps extends React.Props<HTMLDivElement> {
+export interface ISliderProps extends React.Props<HTMLElement> {
   min: number;
   max: number;
   step?: number;
@@ -35,39 +40,42 @@ export interface SliderProps extends React.Props<HTMLDivElement> {
   points?: SliderPointValue[];
   value?: number;
   defaultValue?: number;
-  onChange?(evt: React.ChangeEvent<HTMLElement>, value: number): void;
-  onMouseUp?(evt: React.MouseEvent<HTMLElement>, value: number): void;
-  onMouseDown?(evt: React.MouseEvent<HTMLElement>, value: number): void;
+  handle?(props: ISliderHandleProps): React.ReactNode;
+  onChange?(value?: number): void;
+  onMouseUp?(evt?: React.MouseEvent<HTMLElement>, value?: number): void;
+  onMouseDown?(evt?: React.MouseEvent<HTMLElement>, value?: number): void;
 }
 
-export interface SliderState {
+export interface ISliderState {
+  value?: number;
   position: number;
 }
 
-export default class Slider extends React.Component<SliderProps, SliderState> {
-  private self: HTMLDivElement | void = void 0;
+export default class Slider extends React.Component<ISliderProps, ISliderState> {
+  private self: HTMLElement | void = void 0;
   private mouseHeldDown: boolean = false;
-  private pointWrapper: HTMLDivElement | void = void 0;
-  private startPos: number = 0;
+  private pointWrapper: HTMLElement | void = void 0;
 
-  public state: SliderState = {
+  public state: ISliderState = {
+    value: isUndefined(this.props.value)
+      ? closestNumber(this.props.defaultValue || 0, this.props.min, this.props.max)
+      : closestNumber(this.props.value || 0, this.props.min, this.props.max),
     position: 0,
   };
 
-  public static defaultProps: SliderProps = {
+  public static defaultProps: ISliderProps = {
     min: 0,
     max: 10,
     step: 1,
     defaultValue: 0,
   };
 
-  constructor(props: SliderProps) {
+  constructor(props: ISliderProps) {
     super(props);
-
     this.resolveInitialPosition(props);
   }
 
-  public componentDidUpdate(prevProps: SliderProps): void {
+  public componentDidUpdate(prevProps: ISliderProps): void {
     if (!isUndefined(this.props.value) && prevProps.value !== this.props.value)
       return this.setState({
         ...this.state,
@@ -87,11 +95,7 @@ export default class Slider extends React.Component<SliderProps, SliderState> {
             position={this.state.position}
             onClick={this.handleTrackClick}
           />
-          <SliderHandle
-            disabled={this.props.disabled}
-            position={this.state.position}
-            onMouseDown={this.onMouseDown}
-          />
+          {this.getHandle()}
         </SLIDER_TRACK_WRAPPER>
 
         <SLIDER_POINT_WRAPPER innerRef={this.assignPointRef}>
@@ -101,15 +105,36 @@ export default class Slider extends React.Component<SliderProps, SliderState> {
     );
   }
 
-  private assignSelfRef = (el: HTMLDivElement): void => {
+  private getHandle = (): React.ReactNode => {
+    switch (true) {
+      case this.props.handle !== void 0 && isFunction(this.props.handle):
+        // This is just a dumb workaround the issue that typescript disregards undefined
+        // checks if it's in a switch statement, for some reason.
+        return this.props.handle && this.props.handle({
+          position: this.state.position,
+          disabled: this.props.disabled,
+          onMouseDown: this.onMouseDown,  
+        });
+      default:
+        return (
+          <SliderHandle
+            position={this.state.position}
+            disabled={this.props.disabled}
+            onMouseDown={this.onMouseDown}
+          />
+        );
+    }
+  }
+
+  private assignSelfRef = (el: HTMLElement): void => {
     this.self = el;
   }
 
-  private assignPointRef = (el: HTMLDivElement): void => {
+  private assignPointRef = (el: HTMLElement): void => {
     this.pointWrapper = el;
   }
 
-  private resolveInitialPosition(props: SliderProps): void {
+  private resolveInitialPosition(props: ISliderProps): void {
     const position: number = resolveInitialValue(props);
 
     switch (position) {
@@ -121,23 +146,35 @@ export default class Slider extends React.Component<SliderProps, SliderState> {
     }
   }
 
-  private onMouseDown = (evt: React.MouseEvent<HTMLDivElement>): void => {
+  private onMouseDown = (evt: React.MouseEvent<HTMLElement>): void => {
     if (!this.mouseHeldDown && !this.props.disabled) {
       this.mouseHeldDown = true;
-      this.startPos = evt.pageX;
     }
   }
 
-  private onMouseUp = (evt: React.MouseEvent<HTMLDivElement>): void => {
+  private onMouseUp = (evt: React.MouseEvent<HTMLElement>): void => {
     if (this.mouseHeldDown && !this.props.disabled) {
+      const value: number = closestNumber(
+        getValueFromPosition(this.state.position, this.props.max),
+        this.props.min,
+        this.props.max,
+      );
+      const roundedValue: number = roundValueByStep(value, this.props.step || 1);
       this.mouseHeldDown = false;
-      this.startPos = evt.pageX;
+      this.props.onMouseUp && this.props.onMouseUp(evt, roundedValue);
+      this.setState({ ...this.state, value });
     }
   }
 
-  private onMouseMove = (evt: React.MouseEvent<HTMLDivElement>): void => {
-    if (!this.mouseHeldDown || this.props.disabled)
+  private onMouseMove = (evt: React.MouseEvent<HTMLElement>): void => {
+    // Mouse move should be bound to the document instead
+    // And removed on mouse up
+    
+    // TODO: Check for controlled value
+    //       If controlled, do not update the position on move
+    if (!this.mouseHeldDown || this.props.disabled) {
       return;
+    }
 
     switch (this.props.jump) {
       case true:
@@ -147,9 +184,10 @@ export default class Slider extends React.Component<SliderProps, SliderState> {
     }
   }
 
-  private handleTrackClick = (evt: React.MouseEvent<HTMLDivElement>): void => {
-    if (this.mouseHeldDown)
+  private handleTrackClick = (evt: React.MouseEvent<HTMLElement>): void => {
+    if (this.mouseHeldDown) {
       this.mouseHeldDown = false;
+    }
 
     evt.stopPropagation();
     switch (true) {
@@ -162,9 +200,10 @@ export default class Slider extends React.Component<SliderProps, SliderState> {
     }
   }
 
-  private setPosition = (evt: React.MouseEvent<HTMLDivElement>): void => {
-    if (!this.self)
+  private setPosition = (evt: React.MouseEvent<HTMLElement>): void => {
+    if (!this.self) {
       return;
+    }
 
     const position: number = calculateNextPos(
       this.self,
@@ -172,16 +211,31 @@ export default class Slider extends React.Component<SliderProps, SliderState> {
       this.props.step as number,
       evt.pageX,
     );
+    const value: number = closestNumber(
+      getValueFromPosition(position, this.props.max),
+      this.props.min,
+      this.props.max,
+    );
+    const roundedValue: number = roundValueByStep(value, this.props.step || 1);
 
-    this.setState({ ...this.state, position });
+    this.setState(
+      { ...this.state, position },
+      () => this.props.onChange && this.props.onChange(roundedValue),
+    );
   }
 
-  private setJumpPosition = (evt: React.MouseEvent<HTMLDivElement>): void => {
+  private setJumpPosition = (evt: React.MouseEvent<HTMLElement>): void => {
     const position: number = getNextJumpPoint(
       evt.pageX,
-      (this.pointWrapper as HTMLDivElement).childNodes,
-      (this.pointWrapper as HTMLDivElement),
+      (this.pointWrapper as HTMLElement).childNodes,
+      (this.pointWrapper as HTMLElement),
     );
+    const value: number = closestNumber(
+      getValueFromPosition(position, this.props.max),
+      this.props.min,
+      this.props.max,
+    );
+    const roundedValue: number = roundValueByStep(value, this.props.step || 1);
 
     switch (true) {
       case position === -1:
@@ -189,7 +243,7 @@ export default class Slider extends React.Component<SliderProps, SliderState> {
       default:
         return this.setState(
           { ...this.state, position },
-          () => this.startPos = evt.pageX,
+          () => this.props.onChange && this.props.onChange(roundedValue),
         );
     }
   }

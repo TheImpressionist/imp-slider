@@ -6,8 +6,8 @@
       "dom",
       "es2017"
     ],
-    "allowJs": true,
-    "checkJs": true,
+    "allowJs": false,
+    "checkJs": false,
     "jsx": "react",
     "declaration": false,
     "sourceMap": true,
